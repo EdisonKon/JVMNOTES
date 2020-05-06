@@ -1,4 +1,4 @@
-package con.test.TestJVM;
+package com.test.TestJVM;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package con.test.TestJVM.classloader;
+package com.test.TestJVM.classloader;
 
 /**
  * @Author dekai.kong
