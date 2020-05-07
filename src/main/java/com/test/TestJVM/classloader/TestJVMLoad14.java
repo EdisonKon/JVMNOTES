@@ -22,7 +22,11 @@ public class TestJVMLoad14 {
         /**
          * 输出：
          * sun.misc.Launcher$AppClassLoader@18b4aac2
-         * file:/Users/edison/github/JVMNOTES/target/classes/com/test/TestJVM/classloader/TestJVMLoad14.class
+         * file:/Users/edison/github/JVMNOTES/out/production/JVMNOTES/com/test/TestJVM/classloader/TestJVMLoad14.class
+         * ------------------
+         * sun.misc.Launcher$AppClassLoader@18b4aac2
+         * ------------------
+         * null
          */
 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
