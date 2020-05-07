@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="JVMNOTES" target="1.5" />
+      <module name="JVMNOTES" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

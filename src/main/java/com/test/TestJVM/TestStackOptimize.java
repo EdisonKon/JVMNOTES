@@ -1,6 +1,5 @@
 package com.test.TestJVM;
 
-import org.junit.Test;
 
 /**
  * @author dekai.kong
@@ -57,7 +56,6 @@ public class TestStackOptimize {
         System.gc();
     }
 
-    @Test
     public void test() {
 
     }
