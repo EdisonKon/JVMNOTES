@@ -56,8 +56,8 @@ public class TestJVMLoad16 extends ClassLoader{
 
     @Override
     protected Class<?> findClass(String className) throws ClassNotFoundException {
-        System.out.println("cur:"+className);
-        System.out.println("cur:"+classLoaderName);
+        System.out.println("cur class:"+className);
+        System.out.println("cur classloader:"+classLoaderName);
         byte[] data = loadClassData(className);
         return this.defineClass(className,data,0,data.length);
     }
