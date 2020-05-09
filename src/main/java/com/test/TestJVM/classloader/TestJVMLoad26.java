@@ -23,8 +23,12 @@ import java.util.ServiceLoader;
 public class TestJVMLoad26 {
 
     public static void main(String[] args)  throws Exception{
+        //增加这句话,那么无法从ext目录中找到jdbc的实现类,那么就无法加载里面的driver,所以while里面是空的
+        Thread.currentThread().setContextClassLoader(TestJVMLoad26.class.getClassLoader().getParent());
+
         ServiceLoader<Driver> serviceLoader = ServiceLoader.load(Driver.class);
         Iterator<Driver> iterator = serviceLoader.iterator();
+
         while(iterator.hasNext()){
             Driver driver = iterator.next();
             System.out.println("driver"+driver.getClass()+"loader:"+driver.getClass().getClassLoader());
