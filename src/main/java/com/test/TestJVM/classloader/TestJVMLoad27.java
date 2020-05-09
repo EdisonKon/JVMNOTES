@@ -33,6 +33,14 @@ public class TestJVMLoad27 {
          *
          */
         Class.forName("com.mysql.jdbc.Driver");
+        /**
+         * 在DriverManager中，getConnection会进行Class.forName()进行主动使用SPI的实现类，这时候因为DriverManager是由
+         * BootstrapClassloader进行加载的，所以按照双亲委托机制，spi的实现类也应该由boot进行加载，但是boot它加载不了，所以
+         * DriverManager会找不到spi实现类，双亲委托不可行。
+         * 此时上下文加载器起作用，getConnection里由一个Reflection.getCallerClass()这个参数，获取调用该方法的类，以便于获取该类的加载器，也就是
+         * 上下文加载器（此处为appclassloader，然后是由appcl进行加载，使用 Class.forName(driver.getClass().getName(), true, classLoader)方法
+         * 进行加载，所以SPI的实现类可以成功被加载
+         */
         Connection connection = DriverManager.getConnection("","","");
 
     }
