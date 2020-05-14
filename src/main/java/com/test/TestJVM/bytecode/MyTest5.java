@@ -1,4 +1,4 @@
-package com.test.TestJVM.bytecode.uncompile;
+package com.test.TestJVM.bytecode;
 
 
 /**
@@ -38,9 +38,11 @@ public class MyTest5 {
         MyTest5 myTest5 = new MyTest5();
         myTest5.test(p1);
         myTest5.test(p2);
+        myTest5.test((Son)p2); // 将类型进行了强转,指的是将静态类型转变为了Son,所以调用方法改变了
         //输出:
         //grandpa = com.test.TestJVM.bytecode.uncompile.Father@355da254
         //grandpa = com.test.TestJVM.bytecode.uncompile.Son@4dc63996
+        //Son = com.test.TestJVM.bytecode.uncompile.Son@4dc63996
     }
 }
 
