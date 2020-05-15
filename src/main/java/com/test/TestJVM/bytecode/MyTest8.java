@@ -18,8 +18,37 @@ package com.test.TestJVM.bytecode;
  * 3. 基于栈的指令集的缺点在于完成相同的操作,指令集通常要比基于寄存器的指令集要多，指令集是在内存中完成操作的，
  *    而基于寄存器的指令集是直接由CPU来执行的,是在高速缓冲区中进行的,速度要快很多.虽然虚拟机可以采用一些优化手段,
  *    但总体来说,基于栈的指令集的执行速度要慢一些；
- *
+ *97YV 8DGY JFX7 WTTK Q7KE C445 Z1HL E99Z
  *
  **/
 public class MyTest8 {
+    /**
+     *  0 iconst_1   将1压入操作栈顶
+     *  1 istore_1   将1存储进临时变量表
+     *  2 iconst_2   2
+     *  3 istore_2   2
+     *  4 iconst_3   3
+     *  5 istore_3   3
+     *  6 iconst_4   4
+     *  7 istore 4   4 此处特殊因为istore 快速助记符 只到3 剩下都需要赋值型
+     *  9 iload_1    加载第一个临时变量到操作栈栈顶
+     * 10 iload_2    加载第二个临时变量到操作栈栈顶
+     * 11 iadd       弹出这2个操作数,并相加然后压入栈顶
+     * 12 iload_3    加载第三个临时变量到操作栈栈顶
+     * 13 isub       弹出这2个操作数,并相减然后压入栈顶
+     * 14 iload 4    加载第四个临时变量到操作栈栈顶
+     * 16 imul       弹出这2个操作数,并相乘然后压入栈顶
+     * 17 istore 5   弹出栈顶的数并压入临时变量index为5的位置
+     * 19 iload 5    加载第五个临时变量到操作栈栈顶
+     * 21 ireturn    弹出栈顶元素并返回
+     * @return
+     */
+    public int cal(){
+        int a = 1;
+        int b = 2;
+        int c = 3;
+        int d = 4;
+        int rst = (a + b - c) * d ;
+        return rst;
+    }
 }
