@@ -147,6 +147,15 @@ jcmd (从JDK 1. 7开始增加的命令)
 7. jcmd pid Thread.print: 查看线程堆栈信息
 8. jcmd pid GC.heap dump filename 导出Heap dump文件， 导出的文件可以通过jvisualvm查看
 9. jcmd pid VM.system_ properties:查看JVM的属性信息
+10 jcmd pic VM.version : 当前虚拟机的版本号
+11 jcmd pic VM.command_line : 虚拟机的启动命令行参数
+
+jstack pid 线程相关堆栈信息
+
+※重要 jmc(java mission control) 可以编程jmx等
+jfr: java flight recorder
+
+oql 对象查询语言
 
 ```
 
@@ -183,7 +192,7 @@ jcmd (从JDK 1. 7开始增加的命令)
 ### 方法区
 
 - Java虛拟机规范表示可以不要求虚拟机在这区实现GC,这区GC的“性价比”一般比较低
-  在堆中，尤其是在新生代，常规应用进行I次GC一般可以回收70%~95%的空间，而方法区的GC效率远小于此
+  在堆中，尤其是在新生代，常规应用进行1次GC一般可以回收70%~95%的空间，而方法区的GC效率远小于此
 - 当前的商业JVM都有实现方法区的GC,主要回收两部分内容:废弃常量与无用类
 
 - 主要回收两部分内容:废弃常量与无用类
@@ -307,7 +316,7 @@ jcmd (从JDK 1. 7开始增加的命令)
 - 在Full GC时会对Reference类型的引用进行特殊处理
   - Soft:内存不够时一定会被GC、长期不用也会被GC
   - Weak: - 定会被GC， 当被mark为dead, 会在ReferenceQueue中通知
-  -  Phantom: 本来就没引用，当从jvm heap中释放时会通知
+  - Phantom: 本来就没引用，当从jvm heap中释放时会通知
 
 垃圾回收器
 
@@ -332,11 +341,12 @@ jcmd (从JDK 1. 7开始增加的命令)
 ### 垃圾收集器的‘并行”和并发
 
 - 并行(Parallel):指多个收集器的线程同时工作，但是用户线程处于等待状态
-- 并发(Concurrent):指收集器在工作的同时，可以允许用户线程工作。并发不代表解决了GC停顿的问题，在关键的步骤还是要停顿。比如在收集器标记垃圾的时候。但在清除垃圾的时候，用户线程可以和GC线程并发执行。
+- 并发(Concurrent):指收集器在工作的同时，可以允许用户线程工作。并发不代表解决了GC停顿的问题，在关键的步骤还是要停顿。  
+    比如在收集器标记垃圾的时候。但在清除垃圾的时候，用户线程可以和GC线程并发执行。
 
 ### Serial收集器
 
-- 最早的收集器，单线程进行GC， New和Old Generation都可以使用，在新生代，采用复制算法;
+- 最早的收集器，单线程进行GC,收集时候会STW，New和Old Generation都可以使用，在新生代，采用复制算法;
 - 在老年代，采用Mark-Compact算法因为是单线程GC，没有多线程切换的额外开销，简单实用
   Hotspot Client模式默认的收集器
 
@@ -599,9 +609,10 @@ jcmd (从JDK 1. 7开始增加的命令)
  * Created BY poplar ON 2019/11/30
  * G1日志分析
  * 虚拟机相关参数：
- * -verbose:gc
- * -Xms10m
- * -Xmx10m
+ * -verbose:gc 输出虚拟机中详细的gc日志
+ * -Xms10m  代表堆初始值是10m
+ * -Xmx10m  代表堆最大是10m
+ * -Xmn5m  代表新生代大小5m
  * -XX:+UseG1GC 表示垃圾收集器使用G1
  * -XX:+PrintGCDetails
  * -XX:+PrintGCDateStamps
