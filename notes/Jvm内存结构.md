@@ -246,7 +246,8 @@ oql 对象查询语言
 
 - 将可用内存划分为两块，每次只使用其中的一块，当一半区内存用完了，仅将还存活
   的对象复制到另外一块上面，然后就把原来整块内存空间一次性清理掉，
-- 这样使得每次内存回收都是对整个半区的回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存就可以了，实现简单，运行高效。<font color=red>只是这种算法的代价是将内存缩小为原来的一半，代价高昂</font>
+- 这样使得每次内存回收都是对整个半区的回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存就可以了，实现简单，  
+    运行高效。<font color=red>只是这种算法的代价是将内存缩小为原来的一半，代价高昂</font>
 
 - 现在的商业虚拟机中都是用了这一种收集算法来回收新生代
 - 将内存分为一块较大的eden空间和2块较少的survivor空间，每次使用eden和其中一块
@@ -275,7 +276,8 @@ oql 对象查询语言
 ### 分代收集。( GenerationalCollecting)算法
 
 - 当前商业虚拟机的垃圾收集都是采用“分代收集”( Generational Collecting)算法，根据对象不同的存活周期将内存划分为几块。
-- 一般是把Java堆分作新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法，譬如新生代每次GC都有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本，就可以完成收集。
+- 一般是把Java堆分作新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法，譬如新生代每次GC都有大批对象死去，只有少量存活，  
+    那就选用复制算法，只需要付出少量存活对象的复制成本，就可以完成收集。
 
 ### Hotspot JVM 6中共划分为三个代:
 
@@ -287,7 +289,9 @@ oql 对象查询语言
 
 - 年轻代(Young Generation)
   新生成的对象都放在新生代。年轻代用复制算法进行GC (理论上年轻代对象的生命周期非常短，所以适合复制算法)
-- 年轻代分三个区。一个Eden区，两个Survivor区(可以通过参数设置Survivor个数)。对象在Eden区中生成。当Eden区满时，还存活的对象将被复制到一个Survivor区，当这个Survivor区满时，此区的存活对象将被复制到另外一个Survivor区，当第二个Survivor区也满了的时候，从第一个Survivor区复制过来的并且此时还存活的对象，将被复制到老年代。2个Survivor是完全对称，轮流替换。
+- 年轻代分三个区。一个Eden区，两个Survivor区(可以通过参数设置Survivor个数)。对象在Eden区中生成。当Eden区满时，  
+    还存活的对象将被复制到一个Survivor区，当这个Survivor区满时，此区的存活对象将被复制到另外一个Survivor区，  
+        当第二个Survivor区也满了的时候，从第一个Survivor区复制过来的并且此时还存活的对象，将被复制到老年代。2个Survivor是完全对称，轮流替换。
 - Eden和2个Survivor的缺省比例是8:1:1，也就是10%的空间会被
   浪费。可以根据GClog的信息调整大小的比例
 
@@ -428,14 +432,16 @@ oql 对象查询语言
 - 对比使用mark-sweep的CMS, G1使用的copying算法不会造成内存碎片;
 - 对比Parallel Scavenge(基于copying )、Parallel Old收集器(基于mark-compact-sweep)，Parallel会对整个区域做整理导致gc停顿会比较长，而G1只是特定地整理几个region。
 
-- G1并非一个实时的收集器，与parallelScavenge-样，对gc停顿时间的设置并不绝对生效，只是G1有较高的几率保证不超过设定的gc停顿时间。与之前的gc收集器对比，G1会根据用户设定的gc停顿时间，智能评估哪几个region需要被回收可以满足用户的设定
+- G1并非一个实时的收集器，与parallelScavenge-样，对gc停顿时间的设置并不绝对生效，只是G1有较高的几率保证不超过设定的gc停顿时间。  
+    与之前的gc收集器对比，G1会根据用户设定的gc停顿时间，智能评估哪几个region需要被回收可以满足用户的设定
 
 ### 分区(Region):
 
 - G1采取了不同的策略来解决并行、串行和CMS收集器的碎片、暂停时间不可控等问题一G1将 整个堆分成相同大小的分区(Region)
 
-- 每个分区都可能是年轻代也可能是老年代，但是在同，时刻只能属于某个代。年轻代、幸存区、老年代这些概念还存在，成为逻辑上的概念，这样方便复用之前分代框架的逻辑。
-- 在物理，上不需要连续，则带来了额外的好处有的分区内垃圾对象特别多，有的分区内垃圾对象很少，<font color=red>G1会优先回收垃圾对象特别多的分区，</font>这样可以花费较少的时间来回收这些分区的垃圾，这也就是G1名字的由来，即首先收集垃圾最多的分区。
+- 每个分区都可能是年轻代也可能是老年代，但是在同一时刻只能属于某个代。年轻代、幸存区、老年代这些概念还存在，成为逻辑上的概念，这样方便复用之前分代框架的逻辑。
+- 在物理，上不需要连续，则带来了额外的好处有的分区内垃圾对象特别多，有的分区内垃圾对象很少，<font color=red>G1会优先回收垃圾对象特别多的分区，</font>  
+    这样可以花费较少的时间来回收这些分区的垃圾，这也就是G1名字的由来，即首先收集垃圾最多的分区。
 
 - 依然是在新生代满了的时候，对整个新生代进行回收整个新生代中的对象，要么被回收、要么晋升，至于新生代也采取分区机制的原因，则是因为这样跟老年代的策略统一，方便调整代的大小
 - G1还是一种带压缩的收集器，在回收老年代的分区时，是将存活的对象从一个分区拷贝到另一个可用分区，这个拷贝的过程就实现了局部的压缩。
@@ -446,7 +452,8 @@ oql 对象查询语言
 
 ### 已记忆集合(RSet) : 
 
-- RSet记录了其他Region中的对象引用本Region中对象的关系，属于points-into结构( 谁引用了我的对象)RSet的价值在于使得垃圾收集器不需要扫描整个堆找到谁引用了当前分区中的对象，只需要扫描RSet即可。
+- RSet记录了其他Region中的对象引用本Region中对象的关系，属于points-into结构( 谁引用了我的对象)RSet的价值在于使得垃圾收集器不需要扫描整个堆找到谁引用了  
+    当前分区中的对象，只需要扫描RSet即可。
 
 - Region1和Region3中的对象都引用了Region2中的对象，因此在Region2的RSet中记录了这两个引用。
 
@@ -458,10 +465,11 @@ oql 对象查询语言
   举例来说，如果region A的RSet里有一项的key是region B，value里有index为1234的card,它的意思就是region B的
   一个card里 有引用指向region A。所以对region A来说，该RSet记录的是points-into的关系;而card table仍然记录了points-out的关系。
 
-- Snapshot-AtThe-Beginning(SATB):SATB是G1 GC在并发标记阶段使用的增量式的标记算法，
+### Snapshot-AtThe-Beginning(SATB):
+- SATB是G1 GC在并发标记阶段使用的增量式的标记算法，
 - 并发标记是并发多线程的，但并发线程在同一时刻只扫描一个分区
 
-### 参考链接：<https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html>
+### G1英文介绍 参考链接：<https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html>
 
 ### G1相对于CMS的优势
 
@@ -481,9 +489,11 @@ oql 对象查询语言
 
 - G1提供了两种GC模式，Young GC和Mixed GC, 两种都是完全Stop The World的
 - Young GC:选定所有年轻代里的Region。通过控制年轻代的Region个数，即年轻代内存大小，来控制Young GC的时间开销。
-- Mixed GC:选定所有年轻代里的Region,外加根据global concurrent marking统计得出收集收益高的若干老年代Region。在用户指定的开销目标范围内尽可能选择收益高的老年代Region
+- Mixed GC:选定所有年轻代里的Region,外加根据global concurrent marking统计得出收集收益高的若干老年代Region。  
+    在用户指定的开销目标范围内尽可能选择收益高的老年代Region
 
-- Mixed GC不是Full GC,它只能回收部分老年代的Region,如果Mixed GC实在无法跟上程序分配内存的速度，导致老年代填满无法继续进行MixedGC，就会使用serialold GC (Full GC)来收集整个GC heap。<font color=red> 所以本质上，G1是不提供Full GC的</font>
+- Mixed GC不是Full GC,它只能回收部分老年代的Region,如果Mixed GC实在无法跟上程序分配内存的速度，导致老年代填满无法继续进行MixedGC，  
+    就会使用serialold GC (Full GC)来收集整个GC heap。<font color=red> 所以本质上，G1是不提供Full GC的</font>
 
 ### global concurrent marking
 
@@ -503,9 +513,9 @@ oql 对象查询语言
   - <font color=red>YGC执行步骤：</font>
     - 阶段1:根扫描
       静态和本地对象被描
-    - 阶段2:更新RS
-      处理dirty card队列更新RS
-    - 阶段3:处理RS
+    - 阶段2:更新RSet
+      处理dirty card队列更新RSet
+    - 阶段3:处理RSet
       检测从年轻代指向老年代的对象
     - 阶段4:对象拷贝
       拷贝存活的对象到survivor/old区域
@@ -518,7 +528,8 @@ oql 对象查询语言
 ### 什么时候发生MixedGC?
 
 - 由一些参数控制，另外也控制着哪些老年代Region会被选入CSet (收集集合)
-  - **G1HeapWastePercent**:在globalconcurrent marking结束之后，我们可以知道oldgenregions中有多少空间要被回收，在每次YGC之后和再次发生MixedGC之前，会检查垃圾占比是否达到此参数，只有达到了，下次才 会发生Mixed GC
+  - **G1HeapWastePercent**:在globalconcurrent marking结束之后，我们可以知道oldgenregions中有多少空间要被回收，  
+    在每次YGC之后和再次发生MixedGC之前，会检查垃圾占比是否达到此参数，只有达到了，下次才 会发生Mixed GC
   - **G1MixedGCLiveThresholdPercent**: oldgeneration region中的存活对象的占比，只有在此参数之下，才会被选入CSet
   - **G1MixedGCCountTarget**:一 次globalconcurrent marking之后，最多执行Mixed GC的次数
   - **G1OldCSetRegionThresholdPercent**:次Mixed GC中能被选入CSet的最多old generation region数量
@@ -565,7 +576,8 @@ oql 对象查询语言
 
 ### G1混合式回收
 
-- G1到现在可以知道哪些老的分区可回收垃圾最多。当全局并发标记完成后，在某个时刻，就开始了Mixed GC。这些垃圾回收被称作“混合式”是因为他们不仅仅进行正常的新生代垃圾收集，同时也回收部分后台扫描线程标记的分区混合式GC也是采用的复制清理策略，当GC完成后，会重新释放空间
+- G1到现在可以知道哪些老的分区可回收垃圾最多。当全局并发标记完成后，在某个时刻，就开始了Mixed GC。这些垃圾回收被称作“混合式”是因为  
+    他们不仅仅进行正常的新生代垃圾收集，同时也回收部分后台扫描线程标记的分区混合式GC也是采用的复制清理策略，当GC完成后，会重新释放空间
 
 ### SATB详解
 
@@ -590,7 +602,8 @@ oql 对象查询语言
 - 对black新引用了一个white对象，然后从gray对象删了一个引用该white对象的white对象，这样也会造成了该white对象漏标记，
 - 对black新引用了一个刚new出来的white对象，没有其他gray对象引用该white对象，这样也会造成了该white对象漏标记
 
-- 对于三色算法在concurrent的时候可能产生的漏标记问题，SATB在marking阶段中，对于从gray对象移除的目标引用对象标记为gray,对于black引用的新产生的对象标记为black;由于是在开始的时候进行snapshot,因而可能存在Floating Garbage
+- 对于三色算法在concurrent的时候可能产生的漏标记问题，SATB在marking阶段中，对于从gray对象移除的目标引用对象标记为gray,  
+    对于black引用的新产生的对象标记为black;由于是在开始的时候进行snapshot,因而可能存在Floating Garbage
 
 ### 漏标与误标
 
@@ -610,7 +623,8 @@ oql 对象查询语言
 - G1收集器突出表现出来的一点是通过一个停顿预测模型根据用户配置的停顿时间来选择CSet的大小，从而达到用户期待的应用程序暂停时间。
 - 通过-XX:MaxGCPauseMillis参数来设置。这一点有点类似于ParallelScavenge收集器。 关于停顿时间的设置并不是越短越好。
 
-- 设置的时间越短意味着每次收集的CSet越小，导致垃圾逐步积累变多，最终不得不退化成SerialGC;停顿时间设置的过长，那么会导致每次都会产生长时间的停顿，影响了程序对外的响应时间
+- 设置的时间越短意味着每次收集的CSet越小，导致垃圾逐步积累变多，最终不得不退化成SerialGC;停顿时间设置的过长，  
+    那么会导致每次都会产生长时间的停顿，影响了程序对外的响应时间
 
 ### G1的收集模式
 
@@ -625,7 +639,9 @@ oql 对象查询语言
 - 设置了新生代大小相当于放弃了G1为我们做的自动调优。我们需要做的只是设置整个堆内存的大小，剩下的交给G1自已去分配各个代的大小即可。
 
 - 不断调优暂停时间指标
-  - 通过-XX:MaxGCPauseMillis=x可以设置启动应用程序暂停的时间，G1在运行的时候会根据这个参数选择CSet来满足响应时间的设置。一般情况下这个值设置到100ms或者200ms都是可以的(不同情况下会不一样)，但如果设置成50ms就不太合理。暂停时间设置的太短，就会导致出 现G1跟不上垃圾产生的速度。最终退化成Full GC。所以对这个参数的调优是一个持续的过程，逐步调整到最佳状态。
+  - 通过-XX:MaxGCPauseMillis=x可以设置启动应用程序暂停的时间，G1在运行的时候会根据这个参数选择CSet来满足响应时间的设置。  
+    一般情况下这个值设置到100ms或者200ms都是可以的(不同情况下会不一样)，但如果设置成50ms就不太合理。暂停时间设置的太短，  
+        就会导致出 现G1跟不上垃圾产生的速度。最终退化成Full GC。所以对这个参数的调优是一个持续的过程，逐步调整到最佳状态。
 
 - 关注Evacuation Failure
   - Evacuation（表示copy） Failure类似于CMS里面的晋升失败，堆空间的垃圾太多导致无法完成Region之间的拷贝，于是不得不退化成Full GC来做一次全局范围内的垃圾收集
@@ -702,7 +718,8 @@ public class G1LogAnalysis {
  * 2019-11-30T16:13:41.671+0800: [GC concurrent-root-region-scan-end, 0.0008592 secs]
  * 2019-11-30T16:13:41.671+0800: [GC concurrent-mark-start]
  * 2019-11-30T16:13:41.672+0800: [GC concurrent-mark-end, 0.0000795 secs]
- * 2019-11-30T16:13:41.672+0800: [GC remark 2019-11-30T16:13:41.672+0800: [Finalize Marking, 0.0001170 secs] 2019-11-30T16:13:41.672+0800: [GC ref-proc, 0.0002159 secs] 2019-11-30T16:13:41.672+0800: [Unloading, 0.0005800 secs], 0.0011024 secs]
+ * 2019-11-30T16:13:41.672+0800: [GC remark 2019-11-30T16:13:41.672+0800: [Finalize Marking, 0.0001170 secs] 
+    2019-11-30T16:13:41.672+0800: [GC ref-proc, 0.0002159 secs] 2019-11-30T16:13:41.672+0800: [Unloading, 0.0005800 secs], 0.0011024 secs]
  * [Times: user=0.00 sys=0.00, real=0.00 secs]
  * 2019-11-30T16:13:41.673+0800: [GC cleanup 4800K->4800K(10M), 0.0003239 secs]
  * [Times: user=0.00 sys=0.00, real=0.00 secs]
