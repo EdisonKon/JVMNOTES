@@ -470,6 +470,7 @@ oql 对象查询语言
 - 并发标记是并发多线程的，但并发线程在同一时刻只扫描一个分区
 
 ### G1英文介绍 参考链接：<https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html>
+### G1回收详情介绍 ※重要-非常好 参考链接：<https://www.cnblogs.com/thisiswhy/p/12388638.html>
 
 ### G1相对于CMS的优势
 
@@ -495,9 +496,9 @@ oql 对象查询语言
 - Mixed GC不是Full GC,它只能回收部分老年代的Region,如果Mixed GC实在无法跟上程序分配内存的速度，导致老年代填满无法继续进行MixedGC，  
     就会使用serialold GC (Full GC)来收集整个GC heap。<font color=red> 所以本质上，G1是不提供Full GC的</font>
 
-### global concurrent marking
+### 并发标记 global concurrent marking
 
-- **初始标记( initial mark, STW)** :它标记了从GCRoot开始直接可达的对象。
+- **初始标记( initial mark, STW)** :它标记了从GCRoot开始直接可达的对象。 会在ygc的stw时同时运行
 - **并发标记( Concurrent Marking)** :这个阶段从GC Root开始对heap中的对象进行标记，标记线
   程与应用程序线程并发执行，并且收集各个Region的存活对象信息。
 - **重新标记( Remark, STW)** :标记那些在并发标记阶段发生变化的对象，将被回收。
@@ -521,18 +522,31 @@ oql 对象查询语言
       拷贝存活的对象到survivor/old区域
     - 阶段5:处理引用队列
       软引用，弱引用，虚引用处理
-- 并发阶段（global concurrent marking）
-- 混合模式
+      [
+      首先STW，YGC全过程都在STW时进行，不需要考虑并发场景 .注意 此时的(G.C.M.)的 初始标记 也会在此阶段进行以便省去再次STW的时间
+      选择CSet（Collection Set），YGC中CSet即为全部新生代Region
+      根扫描
+      更新RSet
+      深度复制更新对象到Survivor Region
+      重构RSet
+      释放CSet
+      大对象回收
+      动态扩展内存
+      动态调整新生代Region数量
+      启动并发标记，判断是否需要紧接着进行一次混合式GC
+      ]
+- 并发阶段（global concurrent marking）在ygc之后会触发并发标记阶段,然后判断是否需要mixed GC
+- 混合模式 (mixed GC)
 - Full GC (一 般是G1出现问题时发生，本质上不属于G1，G1进行的回退策略（回退为：Serial Old GC）)
 
 ### 什么时候发生MixedGC?
 
 - 由一些参数控制，另外也控制着哪些老年代Region会被选入CSet (收集集合)
-  - **G1HeapWastePercent**:在globalconcurrent marking结束之后，我们可以知道oldgenregions中有多少空间要被回收，  
+  - **G1HeapWastePercent**: 在global concurrent marking结束之后，我们可以知道old regions中有多少空间要被回收，  
     在每次YGC之后和再次发生MixedGC之前，会检查垃圾占比是否达到此参数，只有达到了，下次才 会发生Mixed GC
-  - **G1MixedGCLiveThresholdPercent**: oldgeneration region中的存活对象的占比，只有在此参数之下，才会被选入CSet
-  - **G1MixedGCCountTarget**:一 次globalconcurrent marking之后，最多执行Mixed GC的次数
-  - **G1OldCSetRegionThresholdPercent**:次Mixed GC中能被选入CSet的最多old generation region数量
+  - **G1MixedGCLiveThresholdPercent**: old generation region中的存活对象的占比，只有在此参数之下，才会被选入CSet
+  - **G1MixedGCCountTarget**: 一次global concurrent marking之后，最多执行Mixed GC的次数
+  - **G1OldCSetRegionThresholdPercent**: 次Mixed GC中能被选入CSet的最多old generation region数量
 
 ### 三色标记算法
 
@@ -602,8 +616,9 @@ oql 对象查询语言
 - 对black新引用了一个white对象，然后从gray对象删了一个引用该white对象的white对象，这样也会造成了该white对象漏标记，
 - 对black新引用了一个刚new出来的white对象，没有其他gray对象引用该white对象，这样也会造成了该white对象漏标记
 
-- 对于三色算法在concurrent的时候可能产生的漏标记问题，SATB在marking阶段中，对于从gray对象移除的目标引用对象标记为gray,  
-    对于black引用的新产生的对象标记为black;由于是在开始的时候进行snapshot,因而可能存在Floating Garbage
+- 对于三色算法在concurrent的时候可能产生的漏标记问题，
+    **SATB在marking阶段中，对于从gray对象移除的目标引用对象标记为gray,  
+    对于black引用的新产生的对象标记为black;由于是在开始的时候进行snapshot,因而可能存在Floating Garbage**
 
 ### 漏标与误标
 
