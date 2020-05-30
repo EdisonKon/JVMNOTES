@@ -748,3 +748,25 @@ public class G1LogAnalysis {
 ```
 
 
+###逃逸分析
+是否所有对象都在堆上分配呢?  
+否,现代的vm可以根据 **逃逸分析** 进行判断是否可在栈上分配对象
+当一个方法中没有对象逃逸的情况就可以利用逃逸分析在栈上分配内存(栈无gc)  
+例如:
+```java
+public class EscapeAnalysis {
+//sb对象是否返回给方法外界进行利用 是判断逃逸的重要指标
+// 如此情况 属于已经逃逸
+    public static StringBuffer getSb(){
+        StringBuffer sb = new StringBuffer();
+        sb.append(1);
+        return sb;
+    }
+// 如此情况 属于不发生逃逸,可在栈上分配
+    public static String getSb(){
+        StringBuffer sb = new StringBuffer();
+        sb.append(1);
+        return sb.toString();
+    }
+}
+```

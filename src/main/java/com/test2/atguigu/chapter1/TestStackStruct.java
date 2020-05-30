@@ -23,4 +23,8 @@ public class TestStackStruct {
         int k = i + j;
 
     }
+
+    public int gettttt() {
+        return i;
+    }
 }
