@@ -17,7 +17,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 
 public class MyMemoryTest4 {
     public static void main(String[] args) {
-        whiletrue();
+//        whiletrue();
         while(true){
             Enhancer enhancer = new Enhancer();
             enhancer.setSuperclass(MyMemoryTest4.class);

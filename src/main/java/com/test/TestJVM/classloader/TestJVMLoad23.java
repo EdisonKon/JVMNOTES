@@ -1,6 +1,6 @@
 package com.test.TestJVM.classloader;
 
-import sun.misc.Launcher;
+//import sun.misc.Launcher;
 
 /**
  * @Author dekai.kong
@@ -23,7 +23,7 @@ public class TestJVMLoad23 {
 
         System.out.println(ClassLoader.class.getClassLoader());
 
-        System.out.println(Launcher.class.getClassLoader());
+//        System.out.println(Launcher.class.getClassLoader());
 
         System.out.println(System.getProperty("java.system.class.loader"));
 

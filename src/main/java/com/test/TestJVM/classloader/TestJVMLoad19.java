@@ -1,6 +1,6 @@
 package com.test.TestJVM.classloader;
 
-import com.sun.crypto.provider.AESKeyGenerator;
+//import com.sun.crypto.provider.AESKeyGenerator;
 
 /**
  * @Author dekai.kong
@@ -21,8 +21,8 @@ public class TestJVMLoad19 {
          * sun.misc.Launcher$ExtClassLoader@355da254
          * sun.misc.Launcher$AppClassLoader@18b4aac2
          */
-        AESKeyGenerator aesKeyGenerator = new AESKeyGenerator();
-        System.out.println(aesKeyGenerator.getClass().getClassLoader());
+//        AESKeyGenerator aesKeyGenerator = new AESKeyGenerator();
+//        System.out.println(aesKeyGenerator.getClass().getClassLoader());
         System.out.println(TestJVMLoad19.class.getClassLoader());
     }
 

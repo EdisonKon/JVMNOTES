@@ -747,10 +747,19 @@ public class G1LogAnalysis {
  */
 ```
 
-
-###逃逸分析
+##代码优化
+    栈上分配
+    同步省略/锁消除
+    分离对象/标量替换
+    
+###逃逸分析->站上分配
+-XX:+DoEscapeAnalysis
 是否所有对象都在堆上分配呢?  
 否,现代的vm可以根据 **逃逸分析** 进行判断是否可在栈上分配对象
+
+**但是现在的hotspot虚拟机上没有使用栈上分配,主要使用的是标量替换,在栈上分配对象的成员变量以实现优化gc** 所以对象还是分配在堆上
+参看:https://www.jianshu.com/p/20bd2e9b1f03
+
 当一个方法中没有对象逃逸的情况就可以利用逃逸分析在栈上分配内存(栈无gc)  
 例如:
 ```java
@@ -767,6 +776,40 @@ public class EscapeAnalysis {
         StringBuffer sb = new StringBuffer();
         sb.append(1);
         return sb.toString();
+    }
+}
+```    
+###同步省略/锁消除
+```java
+public class lockDisable {
+// 如此情况 属于可优化锁,因为sb这个锁对象只有一个线程进入到getSb这个方法内部被调用,此时可以进行锁优化,不进行synchronized的加锁
+//换句话说,这个锁根本就不成立,每个线程进来都会new一个对象 所以根本起不到锁的作用
+    public void getSb(){
+        Object sb = new Object();
+        synchronized (sb){
+            sb.append(1);
+        }
+    }
+// 优化
+    public void getSb(){
+        Object sb = new Object();
+        sb.append(1);
+    }
+}
+```
+
+###标量替换
+-XX:+EliminateAllocations : 默认打开的 标量替换/允许将对象打散分配到栈上
+```java
+public class lockDisable {
+// java对象可以分解成标量和其他对象,此时某些对象只在内部使用的话,可以拆分成标量然后分配带栈上
+//此customer对象可以分解成2个标量 name 和 age
+class Customer{
+    String name;
+    int age;
+} 
+    public void getSb(){
+        Customer sb = new Customer();
     }
 }
 ```

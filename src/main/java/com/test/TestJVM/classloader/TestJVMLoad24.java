@@ -1,6 +1,5 @@
 package com.test.TestJVM.classloader;
 
-import sun.misc.Launcher;
 
 /**
  * @Author dekai.kong
