@@ -26,7 +26,7 @@ public class MyMemoryTest4 {
                 proxy.invokeSuper(obj,args1);
                 return null;
             });
-            System.out.println("enhancer");
+//            System.out.println("enhancer");
             enhancer.create();
         }
     }
